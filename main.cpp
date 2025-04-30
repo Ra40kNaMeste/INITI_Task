@@ -220,10 +220,10 @@ public:
 
     //Шаблонные конструкторы для вектора типа std::vector<IntegerType> и std::vector<IntegerType*> 
     template<typename T, typename = typename std::enable_if<
-        std::is_same_v<T, IntegerType> ||
-        std::is_same_v<T, FloatType> ||
+        std::is_same<T, IntegerType>::value ||
+        std::is_same<T, FloatType>::value ||
         std::is_same_v<T, VectorType> ||
-        std::is_same_v<T, StringType>
+        std::is_same<T, StringType>::value
     >::type>
     VectorType(const std::vector<T> other) :XType<std::vector<Any>>(TypeId::Vector) {
         for (auto item : other) {
@@ -295,37 +295,37 @@ public:
 
     void serialize(Buffer& buff) const {
         auto id = getPayloadTypeId();
-        switch(id){
-            case TypeId::Float:
-                _float_type.serialize(buff);
-                break;
-            case TypeId::String:
-                _str_type.serialize(buff);
-            break;
-                case TypeId::Uint:
-                _int_type.serialize(buff);
-                break;
-            case TypeId::Vector:
-                _vec_type.serialize(buff);
-                break;
+        if (id == TypeId::Float) {
+            _float_type.serialize(buff);
+        }
+        else if (id == TypeId::String) {
+            _str_type.serialize(buff);
+        }
+        else if (id == TypeId::Uint) {
+            _int_type.serialize(buff);
+        }
+        else if (id == TypeId::Vector) {
+            _vec_type.serialize(buff);
         }
     }
 
     Buffer::const_iterator deserialize(Buffer::const_iterator begin, Buffer::const_iterator end) {
         auto id = read_value<TypeId>(begin, end);
-        switch(id){
-            case TypeId::Float:
-                _float_type.deserialize(begin, end);
-                break;
-            case TypeId::String:
-                _str_type.deserialize(begin, end);
-                break;
-            case TypeId::Uint:
-                _int_type.deserialize(begin, end);
-                break;
-            case TypeId::Vector:
-                _vec_type.deserialize(begin, end);
-                break;
+        if (id == TypeId::Float) {
+            begin = _float_type.deserialize(begin, end);
+            _value = &_float_type;
+        }
+        else if (id == TypeId::String) {
+            begin = _str_type.deserialize(begin, end);
+            _value = &_str_type;
+        }
+        else if (id == TypeId::Uint) {
+            begin = _int_type.deserialize(begin, end);
+            _value = &_int_type;
+        }
+        else if (id == TypeId::Vector) {
+            begin = _vec_type.deserialize(begin, end);
+            _value = &_vec_type;
         }
         return begin;
     }
@@ -358,15 +358,17 @@ public:
         if (_o.getPayloadTypeId() != id) {
             return false;
         }
-        switch(id){
-            case TypeId::Float:
-                return ((*static_cast<FloatType*>(_o._value)).get_value() == _float_type.get_value());
-            case TypeId::String:
-                return ((*static_cast<StringType*>(_o._value)).get_value() == _str_type.get_value());
-            case TypeId::Uint:
-                return ((*static_cast<IntegerType*>(_o._value)).get_value() == _int_type.get_value());
-            case TypeId::Vector:
-                return ((*static_cast<VectorType*>(_o._value)).get_value() == _vec_type.get_value());
+        if (id == TypeId::Float) {
+            return ((*static_cast<FloatType*>(_o._value)).get_value() == _float_type.get_value());
+        }
+        else if (id == TypeId::String) {
+            return ((*static_cast<StringType*>(_o._value)).get_value() == _str_type.get_value());
+        }
+        else if (id == TypeId::Uint) {
+            return ((*static_cast<IntegerType*>(_o._value)).get_value() == _int_type.get_value());
+        }
+        else if (id == TypeId::Vector) {
+            return ((*static_cast<VectorType*>(_o._value)).get_value() == _vec_type.get_value());
         }
         return false;
     }
