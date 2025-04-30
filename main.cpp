@@ -220,10 +220,10 @@ public:
 
     //Шаблонные конструкторы для вектора типа std::vector<IntegerType> и std::vector<IntegerType*> 
     template<typename T, typename = typename std::enable_if<
-        std::is_same<T, IntegerType>::value ||
-        std::is_same<T, FloatType>::value ||
+        std::is_same_v<T, IntegerType> ||
+        std::is_same_v<T, FloatType> ||
         std::is_same_v<T, VectorType> ||
-        std::is_same<T, StringType>::value
+        std::is_same_v<T, StringType>
     >::type>
     VectorType(const std::vector<T> other) :XType<std::vector<Any>>(TypeId::Vector) {
         for (auto item : other) {
@@ -232,10 +232,10 @@ public:
     }
 
     template<typename T, typename = typename std::enable_if<
-        std::is_same<T, IntegerType>::value ||
-        std::is_same<T, FloatType>::value ||
+        std::is_same_v<T, IntegerType> ||
+        std::is_same_v<T, FloatType> ||
         std::is_same_v<T, VectorType> ||
-        std::is_same<T, StringType>::value
+        std::is_same_v<T, StringType>
     >::type>
     VectorType(const std::vector<T*> other) :XType<std::vector<Any>>(TypeId::Vector) {
         for (auto item : other) {
